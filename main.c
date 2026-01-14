@@ -58,7 +58,7 @@ void* ArenaAlloc(Arena* arena, size_t chunk)
 }
 
 // Gets the contents of the arena and prints it out
-void* ArenaGet(Arena* arena)
+void ArenaGet(Arena* arena)
 {
     printf("Arena contents (%ld bytes):\n", arena->offset);
     for (size_t i = 0; i < arena->offset; i++)
@@ -71,59 +71,159 @@ void* ArenaGet(Arena* arena)
     printf("\n");
 }
 
+void ArenaRemain(Arena* arena)
+{
+    // This function shows the used / remaining bytes
+    int remaining = arena->capacity - arena->offset;
+
+    printf("Used : %ld Bytes \n", arena->offset);
+
+    if (remaining)
+    {
+        printf("Remaining : %i \n", remaining);
+    }
+    else
+    {
+        printf("Remaining : 0 \n");
+    }
+}
+
+// int main()
+// {
+//     // Defines
+//     Arena arena;
+//     uint8_t Memory_Block[ARENA_SIZE];
+//     size_t Chunk_size;
+
+//     // Initialising the Arena Memory 
+//     ArenaInit(&arena, Memory_Block, ARENA_SIZE); // initialize first
+//     ArenaFlush(&arena);                          // Optional reset
+
+//     // Diags
+//     printf("Initialising the Memory Allocator \n");
+//     // printf("offset   = %ld\n", arena.offset);
+//     // printf("base     = %p\n", (void*)arena.base);
+//     // printf("capacity = %ld\n", arena.capacity);
+//     printf("Chunks   = %i\n", arena.no_chunks);
+
+//     // Populating the Arena Memory with an instance
+//     uint8_t value1 = 14;
+//     size_t* p1 = ArenaAlloc(&arena, sizeof(value1));
+
+//     // Check no NULL was passed
+//     if(!p1)
+//     {
+//         printf("The Arena has reached max capacity, it's time to flush \n");
+//         ArenaFlush(&arena);
+//     }
+
+//     *p1 = value1;
+
+//     // Diagnostic Messages
+//     printf("Populating the Arena Memory Allocator \n");
+//     // printf("offset   = %ld\n", arena.offset);
+//     printf("Chunks   = %i\n", arena.no_chunks);
+    
+//     // Retrieving the Memory stored so far
+//     ArenaGet(&arena); 
+
+//     uint8_t value2 = 168;
+//     uint8_t* p2 = ArenaAlloc(&arena, sizeof(uint8_t));
+    
+//     if(!p1)
+//     {
+//         printf("The Arena has reached max capacity, it's time to flush \n");
+//         ArenaFlush(&arena);
+//     }
+    
+//     *p2 = value2;
+
+//     printf("Chunks   = %i\n", arena.no_chunks);
+//     ArenaGet(&arena); 
+//     ArenaRemain(&arena);
+
+//     return 0;
+// }
+
 int main()
 {
     // Defines
     Arena arena;
+    int input;
+    char Alloc;
+
+    // Memory Defines
     uint8_t Memory_Block[ARENA_SIZE];
     size_t Chunk_size;
+    int remaining;
+    size_t* p1;
+
+    // Input Parameters
+    char buffer[64];
 
     // Initialising the Arena Memory 
-    ArenaInit(&arena, Memory_Block, ARENA_SIZE); // initialize first
-    ArenaFlush(&arena);                          // Optional reset
+    ArenaInit(&arena, Memory_Block, ARENA_SIZE);
 
-    // Diags
-    printf("Initialising the Memory Allocator \n");
-    printf("offset   = %ld\n", arena.offset);
-    printf("base     = %p\n", (void*)arena.base);
-    printf("capacity = %ld\n", arena.capacity);
-    printf("Chunks   = %i\n", arena.no_chunks);
-
-    // Populating the Arena Memory with an instance
-    uint8_t value1 = 14;
-    size_t* p1 = ArenaAlloc(&arena, sizeof(value1));
-
-    // Check no NULL was passed
-    if(!p1)
+    while(1)
     {
-        printf("The Arena has reached max capacity, it's time to flush \n");
-        ArenaFlush(&arena);
+        printf("Arena Memory Allocator Menu \n"
+        "Below are a number of options for allocating your memory \n"
+        "(1) Memory Allocation \n"
+        "(2) Memory Flush / Deletion \n"
+        "(3) Show Current Contents \n"
+        "(4) Show Data Usage \n"
+        "(q) Quit\n"
+        );
+
+        printf("Enter your choice: ");
+        if (!fgets(buffer, sizeof(buffer), stdin))
+            continue;
+
+        // remove newline
+        size_t len = strlen(buffer);
+        if (len > 0 && buffer[len-1] == '\n') buffer[len-1] = '\0';
+
+        // Check if quit
+        if (buffer[0] == 'q') break;
+
+        input = buffer[0] - '0'; // convert char '1' → int 1
+
+        printf("\n----------------------------\n");
+        switch(input)
+        {
+
+            case 1: // Arena Allocation
+                printf("This doesn't work yet");
+                // printf("Enter the data you would like to store to the Arena Memory: \n");
+                // fgets(buffer, sizeof(buffer), stdin);
+                // char Alloc = buffer[0];
+                // p1 =  ArenaAlloc(&arena, sizeof(size_t));    
+                // *p1 = Alloc;
+                break;
+
+            case 2: // Arena Flush
+                ArenaFlush(&arena);
+                printf("Memory has been flushed");
+                break;
+
+            case 3: // Arena Get / Show Contents
+                ArenaGet(&arena);
+                break;
+
+            case 4: // Arena Remaining / Used
+                ArenaRemain(&arena);
+                break;
+
+            default:
+                printf("Invalid option");
+                break;
+        }
+        // Formatting
+        printf("\n----------------------------\n");
+
+        printf("Press Enter to return to the menu...");
+        
+        // Scans for keyboard input
+        fgets(buffer, sizeof(buffer), stdin); // wait for enter
     }
-
-    *p1 = value1;
-
-    // Diagnostic Messages
-    printf("Populating the Arena Memory Allocator \n");
-    printf("offset   = %ld\n", arena.offset);
-    printf("Chunks   = %i\n", arena.no_chunks);
-    
-    // Retrieving the Memory stored so far
-    ArenaGet(&arena); 
-
-    uint8_t value2 = 168;
-    uint8_t* p2 = ArenaAlloc(&arena, sizeof(uint8_t));
-    
-    if(!p1)
-    {
-        printf("The Arena has reached max capacity, it's time to flush \n");
-        ArenaFlush(&arena);
-    }
-    
-    *p2 = value2;
-
-    printf("offset   = %ld\n", arena.offset);
-    printf("Chunks   = %i\n", arena.no_chunks);
-    ArenaGet(&arena); 
-
-    return 0;
 }
