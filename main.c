@@ -8,9 +8,9 @@
 
 // Includes
 #include <stdio.h>
-#include <string.h>
-#include <stddef.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 // Defines
 #define ARENA_SIZE 5000
@@ -88,63 +88,6 @@ void ArenaRemain(Arena* arena)
     }
 }
 
-// int main()
-// {
-//     // Defines
-//     Arena arena;
-//     uint8_t Memory_Block[ARENA_SIZE];
-//     size_t Chunk_size;
-
-//     // Initialising the Arena Memory 
-//     ArenaInit(&arena, Memory_Block, ARENA_SIZE); // initialize first
-//     ArenaFlush(&arena);                          // Optional reset
-
-//     // Diags
-//     printf("Initialising the Memory Allocator \n");
-//     // printf("offset   = %ld\n", arena.offset);
-//     // printf("base     = %p\n", (void*)arena.base);
-//     // printf("capacity = %ld\n", arena.capacity);
-//     printf("Chunks   = %i\n", arena.no_chunks);
-
-//     // Populating the Arena Memory with an instance
-//     uint8_t value1 = 14;
-//     size_t* p1 = ArenaAlloc(&arena, sizeof(value1));
-
-//     // Check no NULL was passed
-//     if(!p1)
-//     {
-//         printf("The Arena has reached max capacity, it's time to flush \n");
-//         ArenaFlush(&arena);
-//     }
-
-//     *p1 = value1;
-
-//     // Diagnostic Messages
-//     printf("Populating the Arena Memory Allocator \n");
-//     // printf("offset   = %ld\n", arena.offset);
-//     printf("Chunks   = %i\n", arena.no_chunks);
-    
-//     // Retrieving the Memory stored so far
-//     ArenaGet(&arena); 
-
-//     uint8_t value2 = 168;
-//     uint8_t* p2 = ArenaAlloc(&arena, sizeof(uint8_t));
-    
-//     if(!p1)
-//     {
-//         printf("The Arena has reached max capacity, it's time to flush \n");
-//         ArenaFlush(&arena);
-//     }
-    
-//     *p2 = value2;
-
-//     printf("Chunks   = %i\n", arena.no_chunks);
-//     ArenaGet(&arena); 
-//     ArenaRemain(&arena);
-
-//     return 0;
-// }
-
 int main()
 {
     // Defines
@@ -156,10 +99,17 @@ int main()
     uint8_t Memory_Block[ARENA_SIZE];
     size_t Chunk_size;
     int remaining;
-    size_t* p1;
+    
 
-    // Input Parameters
+    // Alloc Parameters
+
+        // Pointers
+    void* p1;
+    char* endptr;
+
+        // Input Parameters
     char buffer[64];
+    long num;
 
     // Initialising the Arena Memory 
     ArenaInit(&arena, Memory_Block, ARENA_SIZE);
@@ -183,7 +133,7 @@ int main()
         size_t len = strlen(buffer);
         if (len > 0 && buffer[len-1] == '\n') buffer[len-1] = '\0';
 
-        // Check if quit
+        // Check if user quit
         if (buffer[0] == 'q') break;
 
         input = buffer[0] - '0'; // convert char '1' → int 1
@@ -193,12 +143,35 @@ int main()
         {
 
             case 1: // Arena Allocation
-                printf("This doesn't work yet");
-                // printf("Enter the data you would like to store to the Arena Memory: \n");
-                // fgets(buffer, sizeof(buffer), stdin);
-                // char Alloc = buffer[0];
-                // p1 =  ArenaAlloc(&arena, sizeof(size_t));    
-                // *p1 = Alloc;
+                printf("Enter the data you would like to store to the Arena Memory: \n");
+                fgets(buffer, sizeof(buffer), stdin);
+                
+                // Attempt to convert to long integer
+                num = strtol(buffer, &endptr, 10);
+
+                // Input is a string
+                if (endptr == buffer) 
+                {
+                    printf("Input is a string\n");
+                    
+                    // Get the length of the buffer including endpoint / newline
+                    size_t buff_len = strlen(buffer) + 1;
+
+                    char *s = ArenaAlloc(&arena, buff_len);
+                    memcpy(s, buffer, buff_len);
+                }
+                // Unknown data type 
+                else if (*endptr != '\n' && *endptr != '\0') 
+                {
+                    printf("Extra characters");
+                }
+                // Input is a integer
+                else 
+                {
+                    printf("Valid integer\n");
+                    long *i = ArenaAlloc(&arena, sizeof(long));
+                    *i = num;
+                }
                 break;
 
             case 2: // Arena Flush
